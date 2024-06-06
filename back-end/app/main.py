@@ -1,5 +1,7 @@
+import pandas as pd
 import sys
 sys.path.append('G:/Meu Drive/2024-1/Pin 3/65PIN3_ClassificacaoPeras_ArthurRaissa/back-end')
+
 
 from treinamentoIA.arvoreDecisao import ArvoreDecisao
 from treinamentoIA.regressaoLogistica import RegressaoLogistica
@@ -19,17 +21,50 @@ class Predictor:
         return dtc_prediction, log_reg_prediction
 
 
+
 predictor = Predictor(dtc_model=dtc_model, log_reg_model=log_reg_model)
 
-X_new_data = [[2003,0.430265328,2.58051832,0.46936441,0.938059721,1.339322289,-2.722897099,2.579043452]]
-dtc_prediction, log_reg_prediction = predictor.predict(X_new_data)
 
-if dtc_prediction == 0:
-    print("Previsao da Arvore de Decisao:", str(dtc_prediction) + " Fruta Ruim")
-else:
-    print("Previsao da Arvore de Decisao:", str(dtc_prediction) + " Fruta Boa")
+# para 1 fruta
 
-if log_reg_prediction == 0:
-    print("Previsao da Regressao Logistica:", str(log_reg_prediction) + " Fruta Ruim")
-else:
-    print("Previsao da Regressao Logistica:", str(log_reg_prediction)+ " Fruta Boa")
+# X_new_data = [[2003,0.430265328,2.58051832,0.46936441,0.938059721,1.339322289,-2.722897099,2.579043452]]
+# dtc_prediction, log_reg_prediction = predictor.predict(X_new_data)
+
+# if dtc_prediction == 0:
+#     print("Previsao da Arvore de Decisao:", str(dtc_prediction) + " Fruta Ruim")
+# else:
+#     print("Previsao da Arvore de Decisao:", str(dtc_prediction) + " Fruta Boa")
+
+# if log_reg_prediction == 0:
+#     print("Previsao da Regressao Logistica:", str(log_reg_prediction) + " Fruta Ruim")
+# else:
+#     print("Previsao da Regressao Logistica:", str(log_reg_prediction)+ " Fruta Boa")
+
+
+
+# para um arqivo 
+input_csv_path = 'back-end/dados/peras_dados_50.csv'  
+output_csv_path = 'back-end/dados/peras_dados_50_respostas.csv'
+
+input_data = pd.read_csv(input_csv_path)
+
+feature_names = ['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez']
+
+#arvore
+dtc_predictions = []
+log_reg_predictions = []
+
+
+for index, row in input_data.iterrows():
+    X_new_data = pd.DataFrame ([row.tolist()], columns=feature_names)
+    dtc_prediction, log_reg_prediction = predictor.predict(X_new_data)
+    dtc_predictions.append(dtc_prediction[0])
+    log_reg_predictions.append(log_reg_prediction[0])
+
+
+input_data['Previsao_ArvoreDecisao'] = dtc_predictions
+input_data['Previsao_RegressaoLogistica'] = log_reg_predictions
+
+input_data.to_csv(output_csv_path, index=False)
+
+print(f"Previsoes salvas em {output_csv_path}")

@@ -30,26 +30,26 @@ class ArvoreDecisao:
 
         # validacao
         Y_val_pred = model.predict(X_val)
-        print("Matriz de Confusao (Validacao):")
-        print(confusion_matrix(Y_val, Y_val_pred))
-        print("\nRelatorio de Classificacao (Validacao):")
-        print(classification_report(Y_val, Y_val_pred))
+        # print("Matriz de Confusao (Validacao):")
+        # print(confusion_matrix(Y_val, Y_val_pred))
+        # print("\nRelatorio de Classificacao (Validacao):")
+        # print(classification_report(Y_val, Y_val_pred))
 
         # validacao cruzada
         cv_scores = cross_val_score(model, X_train, Y_train, cv=5)
-        print("Scores de Validacao Cruzada:", cv_scores)
-        print("Media dos Scores de Validacao Cruzada:", np.mean(cv_scores))
-        print("\n")
+        # print("Scores de Validacao Cruzada:", cv_scores)
+        # print("Media dos Scores de Validacao Cruzada:", np.mean(cv_scores))
+        # print("\n")
 
-    print("######      Inicio         #####")
+    # print("######      Inicio         #####")
     # modelo com critério de entropia
     dtc_entropy = DecisionTreeClassifier(criterion='entropy')
-    print("Modelo com criterio de Entropia:")
+    # print("Modelo com criterio de Entropia:")
     evaluate_model(dtc_entropy, X_train, Y_train, X_val, Y_val)
 
     # modelo com critério de gini
     dtc_gini = DecisionTreeClassifier(criterion='gini')
-    print("Modelo com criterio de Gini:")
+    # print("Modelo com criterio de Gini:")
     evaluate_model(dtc_gini, X_train, Y_train, X_val, Y_val)
 
     # hiperparâmetros usando GridSearchCV
@@ -63,17 +63,17 @@ class ArvoreDecisao:
     grid_search = GridSearchCV(DecisionTreeClassifier(), param_grid, cv=5, scoring='accuracy')
     grid_search.fit(X_train, Y_train)
 
-    print("Melhores parametros encontrados:")
-    print(grid_search.best_params_)
+    # print("Melhores parametros encontrados:")
+    # print(grid_search.best_params_)
 
     best_model = grid_search.best_estimator_
-    print("Melhor modelo ajustado:")
+    # print("Melhor modelo ajustado:")
     evaluate_model(best_model, X_train, Y_train, X_val, Y_val)
 
-    print("Conjunto de teste, no melhor modelo")
+    # print("Conjunto de teste, no melhor modelo")
     # Avaliação no conjunto de teste usando o melhor modelo encontrado
     Y_test_pred = best_model.predict(X_test)
-    print("Matriz de Confusao (Teste):")
-    print(confusion_matrix(Y_test, Y_test_pred))
-    print("\nRelatorio de Classificacao (Teste):")
-    print(classification_report(Y_test, Y_test_pred))
+    # print("Matriz de Confusao (Teste):")
+    # print(confusion_matrix(Y_test, Y_test_pred))
+    # print("\nRelatorio de Classificacao (Teste):")
+    # print(classification_report(Y_test, Y_test_pred))
