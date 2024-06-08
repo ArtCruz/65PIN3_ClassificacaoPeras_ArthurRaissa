@@ -1,0 +1,37 @@
+export default interface SomenteUmaFruta {
+    area: string;
+    perimetro: string;
+    eixo_maior: string;
+    eixo_menor: string;
+    excentricidade: string;
+    eqdiasq: string;
+    solidez: string;
+    area_convexa: string;
+    entensao: string;
+    proporcao: string;
+    redondidade: string;
+    compactidade: string;
+    fator_forma_1: string;
+    fator_forma_2: string;
+    fator_forma_3: string;
+    fator_forma_4: string;
+    RR_media: string;
+    RG_media: string;
+    RB_media: string;
+    RR_dev: string;
+    RG_dev: string;
+    RB_dev: string;
+    RR_inclinacao: string;
+    RG_inclinacao: string;
+    RB_inclinacao: string;
+    RR_curtose: string;
+    RG_curtose: string;
+    RB_curtose: string;
+    RR_entropia: string;
+    RG_entropia: string;
+    RB_entropia: string;
+    RR_all: string;
+    RG_all: string;
+    RB_all: string;
+    classe: string;
+}
