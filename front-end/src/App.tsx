@@ -123,6 +123,10 @@ const App = () => {
       return false
     }
 
+    if (!arquivoCSV && todosPreenchidos) {
+      return true
+    }
+
     if (!arquivoCSV && peloMenosUmPreenchido) {
       toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Preencha todos os Campos antes de Calcular Somente Uma Fruta', life: 5000 });
       return false
@@ -131,10 +135,6 @@ const App = () => {
     if (arquivoCSV && peloMenosUmPreenchido || !arquivoCSV && todosVazios) {
       toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Escolha Múltiplas Frutas ou Somente uma Fruta', life: 5000 });
       return false
-    }
-
-    if (!arquivoCSV && todosPreenchidos) {
-      return true
     }
 
     return true
