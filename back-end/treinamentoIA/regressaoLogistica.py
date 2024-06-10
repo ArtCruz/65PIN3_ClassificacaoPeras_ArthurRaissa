@@ -8,7 +8,7 @@ import numpy as np
 
 class RegressaoLogistica:
 
-    df = pd.read_csv('back-end/dados/peras.csv', encoding='latin-1')
+    df = pd.read_csv('dados/peras.csv', encoding='latin-1')
 
     df.iloc[:, -1] = df.iloc[:, -1].replace({'boa': 1, 'ruim': 0})
 

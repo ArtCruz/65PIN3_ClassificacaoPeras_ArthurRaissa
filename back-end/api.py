@@ -9,9 +9,14 @@ app = Flask(__name__)
 dtc_arvore = ArvoreDecisao.best_model
 dtc_regressao = RegressaoLogistica.best_log_reg_model
 
+@app.route('/inicio')
+def inicio():
+    return 'Rodando...'
+
+
 
 @app.route('/unicoArvore', methods=['POST'])
-def prever_fruta():
+def prever_fruta_arvore():
     data = request.json['data']  # Recebe os dados de entrada do corpo da solicitação
     dado_unico = DadoUnico(data, dtc_arvore)
     resultado = dado_unico.resultado    
@@ -21,7 +26,7 @@ def prever_fruta():
 
 
 @app.route('/multiploArvore', methods=['POST'])
-def processar_csv():
+def processar_csv_arvore():
     arquivo_csv = request.files['arquivo']
     if arquivo_csv:
         arquivo_csv_data = arquivo_csv.read()
@@ -37,7 +42,7 @@ def processar_csv():
 
 
 @app.route('/unicoRegressao', methods=['POST'])
-def prever_fruta():
+def prever_fruta_regressao():
     data = request.json['data']
     dado_unico = DadoUnico(data, dtc_regressao)
     resultado = dado_unico.resultado    
@@ -47,7 +52,7 @@ def prever_fruta():
 
 
 @app.route('/multiploRegressao', methods=['POST'])
-def processar_csv():
+def processar_csv_regressao():
     arquivo_csv = request.files['arquivo']
     if arquivo_csv:
         arquivo_csv_data = arquivo_csv.read()
