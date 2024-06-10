@@ -11,63 +11,35 @@ import { FileUpload } from 'primereact/fileupload';
 import './App.css'
 import { InputNumber } from 'primereact/inputnumber';
 import { RadioButton } from 'primereact/radiobutton';
-import ISomenteUmaFruta from './interface/ISomenteUmaFruta'
+import ISomenteUmaPera from './interface/ISomenteUmaPera';
 import axios from 'axios';
 import { Toast } from 'primereact/toast';
 import { Dropdown } from 'primereact/dropdown';
 
 const App = () => {
 
-  let somenteUmaFrutaVazia: ISomenteUmaFruta
-  somenteUmaFrutaVazia = {
-    area: '',
-    perimetro: '',
-    eixo_maior: '',
-    eixo_menor: '',
-    excentricidade: '',
-    eqdiasq: '',
-    solidez: '',
-    area_convexa: '',
-    entensao: '',
-    proporcao: '',
-    redondidade: '',
-    compactidade: '',
-    fator_forma_1: '',
-    fator_forma_2: '',
-    fator_forma_3: '',
-    fator_forma_4: '',
-    RR_media: '',
-    RG_media: '',
-    RB_media: '',
-    RR_dev: '',
-    RG_dev: '',
-    RB_dev: '',
-    RR_inclinacao: '',
-    RG_inclinacao: '',
-    RB_inclinacao: '',
-    RR_curtose: '',
-    RG_curtose: '',
-    RB_curtose: '',
-    RR_entropia: '',
-    RG_entropia: '',
-    RB_entropia: '',
-    RR_all: '',
-    RG_all: '',
-    RB_all: '',
-    classe: '',
+  let somenteUmaPeraVazia: ISomenteUmaPera
+  somenteUmaPeraVazia = {
+    ID: '',
+    tamanho: '',
+    peso: '',
+    docura: '',
+    crocancia: '',
+    suculencia: '',
+    maturacao: '',
+    acidez: '',
   }
 
   const [modeloSelecionado, setModeloSelecionado] = useState<string>('')
   const [file, setFile] = useState<File | null>(null);
   const [arquivoCSV, setArquivoCSV] = useState<File | null>(null);
-  const [caractersticas, setCaractersticas] = useState<ISomenteUmaFruta>(somenteUmaFrutaVazia);
+  const [caractersticas, setCaractersticas] = useState<ISomenteUmaPera>(somenteUmaPeraVazia);
   const caractersticasArray = [caractersticas];
   const toast = useRef<any>(null);
 
-  const opcoesClasse = ['BERHI', 'DEGLET', 'DOKOL', 'IRAQI', 'ROTANA', 'SAFAVI', 'SOGAY'];
   const REGRESSAO_LOGISTICA = "Regressão Logística"
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof ISomenteUmaFruta) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof ISomenteUmaPera) => {
     const { value } = e.target;
     setCaractersticas(prevcaractersticas => ({
       ...prevcaractersticas,
@@ -75,17 +47,17 @@ const App = () => {
     }));
   };
 
-  const transformarEmString = (fruta: ISomenteUmaFruta) => {
-    let stringFruta = '';
+  const transformarEmString = (Pera: ISomenteUmaPera) => {
+    let stringPera = '';
 
-    Object.keys(fruta).forEach((key, index) => {
-      stringFruta += fruta[key as keyof ISomenteUmaFruta];
-      if (index !== Object.keys(fruta).length - 1) {
-        stringFruta += ';';
+    Object.keys(Pera).forEach((key, index) => {
+      stringPera += Pera[key as keyof ISomenteUmaPera];
+      if (index !== Object.keys(Pera).length - 1) {
+        stringPera += ';';
       }
     });
 
-    return stringFruta;
+    return stringPera;
   }
 
   const handleChoose = (event: any) => {
@@ -102,19 +74,12 @@ const App = () => {
   });
 
   const peloMenosUmPreenchido = Object.keys(caractersticas).some(key => {
-    if (key === 'classe') {
-      return caractersticas[key as keyof typeof caractersticas] !== "";
-    } else {
       return caractersticas[key as keyof typeof caractersticas] !== null;
-    }
   });
 
   const todosVazios = Object.keys(caractersticas).every(key => {
-    if (key === 'classe') {
-      return caractersticas[key as keyof typeof caractersticas] === "";
-    } else {
       return caractersticas[key as keyof typeof caractersticas] === null;
-    }
+    
   });
 
   const verificacoes = (): boolean => {
@@ -128,12 +93,12 @@ const App = () => {
     }
 
     if (!arquivoCSV && peloMenosUmPreenchido) {
-      toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Preencha todos os Campos antes de Calcular Somente Uma Fruta', life: 5000 });
+      toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Preencha todos os Campos antes de Calcular Somente Uma Pera', life: 5000 });
       return false
     }
 
     if (arquivoCSV && peloMenosUmPreenchido || !arquivoCSV && todosVazios) {
-      toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Escolha Múltiplas Frutas ou Somente uma Fruta', life: 5000 });
+      toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Escolha Múltiplas Peras ou Somente uma Pera', life: 5000 });
       return false
     }
 
@@ -157,17 +122,17 @@ const App = () => {
 
   const analiseModeloRegLog = async () => {
     if (!arquivoCSV && todosPreenchidos) {
-      //Requisição Modelo Regressão Lógica e Somente uma Fruta
+      //Requisição Modelo Regressão Lógica e Somente uma Pera
     } else if (arquivoCSV && todosVazios) {
-      //Requisição Modelo Regressão Lógica e Múltiplas Frutas
+      //Requisição Modelo Regressão Lógica e Múltiplas Peras
     }
   }
 
   const analiseModeloArvDec = async () => {
     if (!arquivoCSV && todosPreenchidos) {
-      //Requisição Modelo Árvore de Decisão e Somente uma Fruta
+      //Requisição Modelo Árvore de Decisão e Somente uma Pera
     } else if (arquivoCSV && todosVazios) {
-      //Requisição Modelo Árvore de Decisão e Múltiplas Frutas
+      //Requisição Modelo Árvore de Decisão e Múltiplas Peras
     }
   }
 
@@ -194,52 +159,23 @@ const App = () => {
         </div>
         <div className='flex'>
           <div className='pt-4'>
-            <p className='ml-3 font-bold text-4xl mr-3' style={{ fontFamily: 'Inika' }}>Visualizar Múltiplas Frutas:</p>
+            <p className='ml-3 font-bold text-4xl mr-3' style={{ fontFamily: 'Inika' }}>Calcular Múltiplas Peras:</p>
           </div>
           <FileUpload className='border-blue-900 border-solid border-round-md' accept=".csv" maxFileSize={1000000} onSelect={handleChoose} emptyTemplate={<p className="m-0">Arraste e Solte o Arquivo CSV Aqui</p>} />
         </div>
       </div>
       <div className='ml-3 mr-3 h-16rem'>
-        <p className='font-bold text-4xl' style={{ fontFamily: 'Inika' }} >Calcular Somente uma Fruta:</p>
+        <p className='font-bold text-4xl' style={{ fontFamily: 'Inika' }} >Calcular Somente uma Pera:</p>
 
         <DataTable className='border-blue-900 border-solid border-round-md' value={caractersticasArray}  >
-          <Column header="area" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.area} required onValueChange={(e: any) => handleInputChange(e, 'area')} mode="decimal" />)} />
-          <Column header="perimetro" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.perimetro} required onValueChange={(e: any) => handleInputChange(e, 'perimetro')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="eixo_maior" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.eixo_maior} required onValueChange={(e: any) => handleInputChange(e, 'eixo_maior')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="eixo_menor" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.eixo_menor} onValueChange={(e: any) => handleInputChange(e, 'eixo_menor')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="excentricidade" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.excentricidade} onValueChange={(e: any) => handleInputChange(e, 'excentricidade')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="eqdiasq" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.eqdiasq} onValueChange={(e: any) => handleInputChange(e, 'eqdiasq')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="solidez" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.solidez} onValueChange={(e: any) => handleInputChange(e, 'solidez')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="area_convexa" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.area_convexa} onValueChange={(e: any) => handleInputChange(e, 'area_convexa')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="entensao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.entensao} onValueChange={(e: any) => handleInputChange(e, 'entensao')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="proporcao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.proporcao} onValueChange={(e: any) => handleInputChange(e, 'proporcao')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="redondidade" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.redondidade} onValueChange={(e: any) => handleInputChange(e, 'redondidade')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="compactidade" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.compactidade} onValueChange={(e: any) => handleInputChange(e, 'compactidade')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="fator_forma_1" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.fator_forma_1} onValueChange={(e: any) => handleInputChange(e, 'fator_forma_1')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="fator_forma_2" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.fator_forma_2} onValueChange={(e: any) => handleInputChange(e, 'fator_forma_2')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="fator_forma_3" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.fator_forma_3} onValueChange={(e: any) => handleInputChange(e, 'fator_forma_3')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="fator_forma_4" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.fator_forma_4} onValueChange={(e: any) => handleInputChange(e, 'fator_forma_4')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RR_media" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RR_media} onValueChange={(e: any) => handleInputChange(e, 'RR_media')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RG_media" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RG_media} onValueChange={(e: any) => handleInputChange(e, 'RG_media')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RB_media" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RB_media} onValueChange={(e: any) => handleInputChange(e, 'RB_media')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RR_dev" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RR_dev} onValueChange={(e: any) => handleInputChange(e, 'RR_dev')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RG_dev" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RG_dev} onValueChange={(e: any) => handleInputChange(e, 'RG_dev')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RB_dev" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RB_dev} onValueChange={(e: any) => handleInputChange(e, 'RB_dev')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RR_inclinacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RR_inclinacao} onValueChange={(e: any) => handleInputChange(e, 'RR_inclinacao')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RG_inclinacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RG_inclinacao} onValueChange={(e: any) => handleInputChange(e, 'RG_inclinacao')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RB_inclinacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RB_inclinacao} onValueChange={(e: any) => handleInputChange(e, 'RB_inclinacao')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RR_curtose" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RR_curtose} onValueChange={(e: any) => handleInputChange(e, 'RR_curtose')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RG_curtose" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RG_curtose} onValueChange={(e: any) => handleInputChange(e, 'RG_curtose')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RB_curtose" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RB_curtose} onValueChange={(e: any) => handleInputChange(e, 'RB_curtose')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RR_entropia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RR_entropia} onValueChange={(e: any) => handleInputChange(e, 'RR_entropia')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RG_entropia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RG_entropia} onValueChange={(e: any) => handleInputChange(e, 'RG_entropia')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RB_entropia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RB_entropia} onValueChange={(e: any) => handleInputChange(e, 'RB_entropia')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RR_all" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RR_all} onValueChange={(e: any) => handleInputChange(e, 'RR_all')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RG_all" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RG_all} onValueChange={(e: any) => handleInputChange(e, 'RG_all')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="RB_all" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.RB_all} onValueChange={(e: any) => handleInputChange(e, 'RB_all')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
-          <Column header="classe" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<Dropdown value={rowData.classe} options={opcoesClasse.map(opcao => ({ label: opcao, value: opcao }))} onChange={(e: any) => handleInputChange(e, 'classe')} />
-          )}
-          />
+          <Column header="ID" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.ID} required onValueChange={(e: any) => handleInputChange(e, 'ID')} mode="decimal" />)} />
+          <Column header="tamanho" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.tamanho} required onValueChange={(e: any) => handleInputChange(e, 'tamanho')} mode="decimal" />)} />
+          <Column header="peso" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.peso} required onValueChange={(e: any) => handleInputChange(e, 'peso')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
+          <Column header="docura" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.docura} required onValueChange={(e: any) => handleInputChange(e, 'docura')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
+          <Column header="crocancia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.crocancia} onValueChange={(e: any) => handleInputChange(e, 'crocancia')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
+          <Column header="suculencia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.suculencia} onValueChange={(e: any) => handleInputChange(e, 'suculencia')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
+          <Column header="maturacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.maturacao} onValueChange={(e: any) => handleInputChange(e, 'maturacao')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
+          <Column header="acidez" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.acidez} onValueChange={(e: any) => handleInputChange(e, 'acidez')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
         </DataTable>
       </div>
       <div className='flex justify-content-end mr-8'>
