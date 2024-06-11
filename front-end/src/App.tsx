@@ -37,6 +37,7 @@ const App = () => {
   const caractersticasArray = [caractersticas];
   const toast = useRef<any>(null);
 
+
   const REGRESSAO_LOGISTICA = "Regressão Logística"
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof ISomenteUmaPera) => {
@@ -69,16 +70,48 @@ const App = () => {
     }
   };
 
+  const enviarArquivoCSV = async () => {
+    const formData = new FormData();
+    if (arquivoCSV) {
+      formData.append('file', arquivoCSV);
+      formData.append('model_type', modeloSelecionado);
+      formData.append('file_name', arquivoCSV.name);
+  
+      try {
+        const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+  
+        if (response.status === 200) {
+          const calcularResponse = await axios.post('http://127.0.0.1:5000/calcular', formData);
+          if (calcularResponse.status === 200) {
+            toast.current.show({ severity: 'success', summary: 'Sucesso', detail: calcularResponse.data.message, life: 5000 });
+          }
+        }
+      } catch (error) {
+        toast.current.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao enviar arquivo', life: 5000 });
+        console.error('Erro ao enviar arquivo:', error);
+      }
+    }
+  };
+
+
+
+
+
+
   const todosPreenchidos = Object.keys(caractersticas).every(key => {
     return caractersticas[key as keyof typeof caractersticas] !== null && caractersticas[key as keyof typeof caractersticas] !== "";
   });
 
   const peloMenosUmPreenchido = Object.keys(caractersticas).some(key => {
-      return caractersticas[key as keyof typeof caractersticas] !== null;
+      return caractersticas[key as keyof typeof caractersticas] !== "";
   });
 
   const todosVazios = Object.keys(caractersticas).every(key => {
-      return caractersticas[key as keyof typeof caractersticas] === null;
+      return caractersticas[key as keyof typeof caractersticas] === "";
     
   });
 
@@ -105,9 +138,9 @@ const App = () => {
     return true
   }
 
-  const handleFileSubmit = async () => {
+  const handleFileSubmitt = async () => {
     if (verificacoes()) {
-      if (modeloSelecionado == REGRESSAO_LOGISTICA) {
+      if (modeloSelecionado === REGRESSAO_LOGISTICA) {
         analiseModeloRegLog()
       } else {
         analiseModeloArvDec()
@@ -120,21 +153,84 @@ const App = () => {
     }
   };
 
-  const analiseModeloRegLog = async () => {
-    if (!arquivoCSV && todosPreenchidos) {
-      //Requisição Modelo Regressão Lógica e Somente uma Pera
-    } else if (arquivoCSV && todosVazios) {
-      //Requisição Modelo Regressão Lógica e Múltiplas Peras
+  const handleFileSubmit = async () => {
+    if (verificacoes()) {
+      if (arquivoCSV && todosVazios) {
+        await enviarArquivoCSV();
+      } else if (!arquivoCSV && todosPreenchidos) {
+        // await enviarDadosUnicos();
+      }
     }
-  }
+  };
+
+  const analiseModeloRegLog = async () => {
+    // const data = Object.values(caractersticas).join(',');
+    const data = [225, -2.002139587, -2.625820278, -0.908798685, -1.780175222, 1.197048603, 3.678592367, -4.434327674];
+
+    console.log(data)
+    if (!arquivoCSV && todosPreenchidos) {  
+      const url = 'http://127.0.0.1:5000/unicoRegressao';
+      axios.post(url, { data } )
+        .then(response => {
+          const resultado = response.data.resultado;
+          // Faça o que quiser com o resultado
+          console.log(resultado)
+        })
+        .catch(error => {
+          console.error('Erro ao enviar dados:', error);
+        });
+
+    } else if (arquivoCSV && todosVazios) {
+      const formData = new FormData();
+      formData.append('arquivo', arquivoCSV);
+      const url = 'http://127.0.0.1:5000/multiploRegressao';
+      axios.post(url, formData, { responseType: 'blob' })
+        .then(response => {
+          // Lidar com a resposta do backend
+          const blob = new Blob([response.data], { type: 'text/csv' });
+          const downloadLink = document.createElement('a');
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = 'saida.csv';
+          downloadLink.click();
+        })
+        .catch(error => {
+          console.error('Erro ao enviar arquivo:', error);
+        });
+    }
+  };
 
   const analiseModeloArvDec = async () => {
+    const data = transformarEmString(caractersticas);
+
     if (!arquivoCSV && todosPreenchidos) {
-      //Requisição Modelo Árvore de Decisão e Somente uma Pera
+      const url = 'http://127.0.0.1:5000/unicoArvore';
+      axios.post(url, { data })
+        .then(response => {
+          const resultado = response.data.resultado;
+          // Faça o que quiser com o resultado
+          console.log(resultado)
+        })
+        .catch(error => {
+          console.error('Erro ao enviar dados:', error);
+        });
     } else if (arquivoCSV && todosVazios) {
-      //Requisição Modelo Árvore de Decisão e Múltiplas Peras
+      const formData = new FormData();
+      formData.append('arquivo', arquivoCSV);
+      const url = 'http://127.0.0.1:5000/multiploArvore';
+      axios.post(url, formData, { responseType: 'blob' })
+        .then(response => {
+          // Lidar com a resposta do backend
+          const blob = new Blob([response.data], { type: 'text/csv' });
+          const downloadLink = document.createElement('a');
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = 'saida.csv';
+          downloadLink.click();
+        })
+        .catch(error => {
+          console.error('Erro ao enviar arquivo:', error);
+        });
     }
-  }
+  };
 
 
   return (
@@ -168,7 +264,7 @@ const App = () => {
         <p className='font-bold text-4xl' style={{ fontFamily: 'Inika' }} >Calcular Somente uma Pera:</p>
 
         <DataTable className='border-blue-900 border-solid border-round-md' value={caractersticasArray}  >
-          <Column header="ID" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.ID} required onValueChange={(e: any) => handleInputChange(e, 'ID')} mode="decimal" />)} />
+          {/* <Column header="ID" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.ID} required onValueChange={(e: any) => handleInputChange(e, 'ID')} mode="decimal" />)} />
           <Column header="tamanho" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.tamanho} required onValueChange={(e: any) => handleInputChange(e, 'tamanho')} mode="decimal" />)} />
           <Column header="peso" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.peso} required onValueChange={(e: any) => handleInputChange(e, 'peso')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
           <Column header="docura" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.docura} required onValueChange={(e: any) => handleInputChange(e, 'docura')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
@@ -176,6 +272,15 @@ const App = () => {
           <Column header="suculencia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.suculencia} onValueChange={(e: any) => handleInputChange(e, 'suculencia')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
           <Column header="maturacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.maturacao} onValueChange={(e: any) => handleInputChange(e, 'maturacao')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
           <Column header="acidez" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputNumber value={rowData.acidez} onValueChange={(e: any) => handleInputChange(e, 'acidez')} mode="decimal" max={10000000000} minFractionDigits={0} maxFractionDigits={5} step={0.00001} />)} />
+         */}
+          <Column header="ID" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.ID} required onChange={(e) => handleInputChange(e, 'ID')} />)} />
+          <Column header="tamanho" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.tamanho} required onChange={(e) => handleInputChange(e, 'tamanho')} />)} />
+          <Column header="peso" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.peso} required onChange={(e) => handleInputChange(e, 'peso')} />)} />
+          <Column header="docura" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.docura} required onChange={(e) => handleInputChange(e, 'docura')} />)} />
+          <Column header="crocancia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.crocancia} onChange={(e) => handleInputChange(e, 'crocancia')} />)} />
+          <Column header="suculencia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.suculencia} onChange={(e) => handleInputChange(e, 'suculencia')} />)} />
+          <Column header="maturacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.maturacao} onChange={(e) => handleInputChange(e, 'maturacao')} />)} />
+          <Column header="acidez" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.acidez} onChange={(e) => handleInputChange(e, 'acidez')} />)} />
         </DataTable>
       </div>
       <div className='flex justify-content-end mr-8'>

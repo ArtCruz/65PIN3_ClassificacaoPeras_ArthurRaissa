@@ -3,26 +3,27 @@ import sys
 sys.path.append('G:/Meu Drive/2024-1/Pin 3/65PIN3_ClassificacaoPeras_ArthurRaissa/back-end')
 
 
-from treinamentoIA.arvoreDecisao import ArvoreDecisao
+from treinamentoIA.regressaoLogistica import RegressaoLogistica
 
 dtc_regressao = RegressaoLogistica.best_log_reg_model
 
 
-class DadoUnico:
+class DadoUnicoReg:
     def __init__(self, data, dtc_regressao):
         self.data = data
+        print(self.data)
         self.dtc_regressao= dtc_regressao
         self.resultado = self.predict()
 
     def predict(self):
-        data_df = pd.DataFrame([self.data], columns=['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez'])
+        data_df = pd.DataFrame([self.data], columns=['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez']).T
         dtc_prediction = self.dtc_regressao.predict(data_df)
         dtc_prediction = 'boa' if dtc_prediction[0] == 1 else 'ruim'
         print('Previsao de fruta unica realizada com sucesso! - Regressao')
         return dtc_prediction
 
 
-class DadoMultiplo:
+class DadoMultiploReg:
     def __init__(self, dtc_regressao):
         self.dtc_regressao = dtc_regressao
 

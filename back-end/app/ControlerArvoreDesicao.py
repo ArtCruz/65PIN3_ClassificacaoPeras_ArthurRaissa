@@ -8,14 +8,14 @@ from treinamentoIA.arvoreDecisao import ArvoreDecisao
 dtc_arvore = ArvoreDecisao.best_model
 
 
-class DadoUnico:
+class DadoUnicoArvore:
     def __init__(self, data, dtc_arvore):
         self.data = data
         self.dtc_arvore= dtc_arvore
         self.resultado = self.predict()
 
     def predict(self):
-        data_df = pd.DataFrame([self.data], columns=['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez'])
+        data_df = pd.DataFrame(self.data, columns=['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez']).T
         dtc_prediction = self.dtc_arvore.predict(data_df)
         dtc_prediction = 'boa' if dtc_prediction[0] == 1 else 'ruim'
         print('Previsao de fruta unica realizada com sucesso! - Arvore')
