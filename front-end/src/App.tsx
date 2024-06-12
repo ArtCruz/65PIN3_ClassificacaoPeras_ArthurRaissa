@@ -79,7 +79,6 @@ const App = () => {
     const file = event.files[0];
     if (file && file.type === 'text/csv') {
       setArquivoCSV(file.name);
-      console.log(file.name)
     } else {
       toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, selecione um arquivo CSV', life: 5000 });
     }
@@ -129,7 +128,6 @@ const App = () => {
         enviarArquivoCSVArv()
       }
     }
-    console.log(caractersticasArray)
   };
 
   const handleFileUnit = async () => {
@@ -268,7 +266,6 @@ const App = () => {
       ...rowData,
       [field]: e.target.value
     }));
-    console.log("Testeee: " + updatedData)
     setData(updatedData);
   };
 
