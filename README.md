@@ -38,7 +38,7 @@ Antes de prosseguir para a classificação das peras, é necessário selecionar 
 
 #### Importação de Dados
 
-Se deseja classificar múltiplas peras, pode-se importar um arquivo CSV. Certifique-se de selecionar um arquivo localizado em `65PIN3_ClassificacaoPeras_ArthurRaissa/back-end/dados/`.
+Se deseja classificar múltiplas peras, pode-se importar um arquivo CSV. Selecione o arquivo CSV em seu computador.
 
 #### Classificação
 
