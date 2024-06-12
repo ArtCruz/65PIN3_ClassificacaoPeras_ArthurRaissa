@@ -27,11 +27,13 @@ def inicio():
 
 @app.route('/unicoArvore', methods=['POST'])
 def prever_fruta_arvore():
-    data = request.json['data']  # Recebe os dados de entrada do corpo da solicitação
-    dado_unico = DadoUnicoArvore(data, dtc_arvore)
+    data = request.get_json()
+    print(data)
+    dado_unico = DadoUnicoArvore(data['data'], dtc_arvore)
     resultado = dado_unico.resultado    
-    return jsonify({'resultado': resultado})
-
+    response = jsonify({'resultado': resultado})
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+    return response
 
 
 
@@ -97,11 +99,11 @@ def processar_csv_arvore():
 @app.route('/unicoRegressao', methods=['POST'])
 def prever_fruta_regressao():
     data = request.get_json()
-    print("aaaaaaaaaaaaqqqqqqqqqqqqquuuuuuuuuuiiiiiiiii")
     print(data)
-    dado_unico = DadoUnicoReg(data, dtc_regressao)
-    # resultado = dado_unico.resultado   
-    resultado = dado_unico.predict
+    # dado_unico = DadoUnicoReg(data, dtc_regressao)
+    dado_unico = DadoUnicoReg(data['data'], dtc_regressao)
+    resultado = dado_unico.resultado   
+    # resultado = dado_unico.predict
     response = jsonify({'resultado': resultado})
     response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
     return response

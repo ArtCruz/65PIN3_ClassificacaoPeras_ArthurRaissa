@@ -15,12 +15,22 @@ class DadoUnicoReg:
         self.dtc_regressao= dtc_regressao
         self.resultado = self.predict()
 
-    def predict(self):
+    def predictMu(self):
         data_df = pd.DataFrame([self.data], columns=['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez']).T
         dtc_prediction = self.dtc_regressao.predict(data_df)
         dtc_prediction = 'boa' if dtc_prediction[0] == 1 else 'ruim'
         print('Previsao de fruta unica realizada com sucesso! - Regressao')
         return dtc_prediction
+
+
+    def predict(self):
+        data_list = [float(i) for i in self.data.split(',')]
+        data_df = pd.DataFrame([data_list], columns=['id', 'tamanho', 'peso', 'docura', 'crocancia', 'suculencia', 'maturacao', 'acidez'])
+        dtc_prediction = self.dtc_regressao.predict(data_df)
+        dtc_predictionn = 'boa' if dtc_prediction[0] == 1 else 'ruim'
+        print('Previsao de fruta unica realizada com sucesso! - Regressao')
+        print(dtc_predictionn)
+        return dtc_predictionn
 
 
 class DadoMultiploReg:

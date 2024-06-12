@@ -14,13 +14,21 @@ class DadoUnicoArvore:
         self.dtc_arvore= dtc_arvore
         self.resultado = self.predict()
 
-    def predict(self):
+    def predictMu(self):
         data_df = pd.DataFrame(self.data, columns=['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez']).T
-        dtc_prediction = self.dtc_arvore.predict(data_df)
-        dtc_prediction = 'boa' if dtc_prediction[0] == 1 else 'ruim'
+        dtc_arvore = self.dtc_arvore.predict(data_df)
+        dtc_prediction = 'boa' if dtc_arvore[0] == 1 else 'ruim'
         print('Previsao de fruta unica realizada com sucesso! - Arvore')
         return dtc_prediction
 
+    def predict(self):
+            data_list = [float(i) for i in self.data.split(',')]
+            data_df = pd.DataFrame([data_list], columns=['id', 'tamanho', 'peso', 'docura', 'crocancia', 'suculencia', 'maturacao', 'acidez'])
+            dtc_arvore = self.dtc_arvore.predict(data_df)
+            dtc_predictionn = 'boa' if dtc_arvore[0] == 1 else 'ruim'
+            print('Previsao de fruta unica realizada com sucesso! - Regressao')
+            print(dtc_predictionn)
+            return dtc_predictionn
 
 # data = [225,-2.002139587,-2.625820278,-0.908798685,-1.780175222,1.197048603,3.678592367,-4.434327674]
 # dado_unico = DadoUnico(data=data, dtc_arvore=dtc_arvore)

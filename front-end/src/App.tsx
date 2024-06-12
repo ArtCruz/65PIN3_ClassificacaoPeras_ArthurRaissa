@@ -143,6 +143,20 @@ const App = () => {
     }
   };
 
+  const handleFileUnit = async () => {
+    if (verificacoes()) {
+      if (modeloSelecionado == REGRESSAO_LOGISTICA) {
+        analiseModeloRegLog()
+      } else {
+        analiseModeloArvDec()
+      }
+      console.log(modeloSelecionado)
+      console.log(caractersticas)
+      console.log(transformarEmString(caractersticas))
+      console.log(arquivoCSV)
+    }
+  };
+
   // const handleFileSubmit = async () => {
   //   if (verificacoes()) {
   //     if (arquivoCSV && todosVazios) {
@@ -154,10 +168,9 @@ const App = () => {
   // };
   
   const analiseModeloRegLog = async () => {
-    // const data = Object.values(caractersticas).join(',');
     // const data = [225, -2.002139587, -2.625820278, -0.908798685, -1.780175222, 1.197048603, 3.678592367, -4.434327674];
-    if (!arquivoCSV && todosPreenchidos) {  
-      const data = Object.values(caractersticas).join(',');
+      // const data = Object.values(caractersticas).join(',');
+      const data = transformarEmString(caractersticas);
       const url = 'http://127.0.0.1:5000/unicoRegressao';
       axios.post(url, { data } )
         .then(response => {
@@ -167,10 +180,6 @@ const App = () => {
         .catch(error => {
           console.error('Erro ao enviar dados:', error);
         });
-
-    } else if (arquivoCSV && todosVazios) {
-        
-    }
   };
   
   
@@ -274,7 +283,8 @@ const App = () => {
         </DataTable>
       </div>
       <div className='flex justify-content-end mr-8'>
-        <Button label="Calcular" onClick={handleFileSubmitt} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900" />
+        <Button label="Calcular Arquivo" onClick={handleFileSubmitt} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900" />
+        <Button label="Calcular Somente uma " onClick={handleFileUnit} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900" />
       </div>
     </div>
   );
