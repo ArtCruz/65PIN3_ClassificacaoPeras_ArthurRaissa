@@ -1,4 +1,4 @@
-export default interface SomenteUmaPera {
+export default interface FrutaResposta {
     id: string,
     tamanho: string;
     peso: string;
@@ -7,4 +7,5 @@ export default interface SomenteUmaPera {
     suculencia: string;
     maturacao: string;
     acidez: string;
+    resultado: string;
 }

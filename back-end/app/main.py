@@ -62,8 +62,8 @@ for index, row in input_data.iterrows():
     log_reg_predictions.append(log_reg_prediction[0])
 
 
-input_data['Previsao_ArvoreDecisao'] = dtc_predictions
-input_data['Previsao_RegressaoLogistica'] = log_reg_predictions
+input_data['resultado'] = dtc_predictions
+input_data['resultado'] = log_reg_predictions
 
 input_data.to_csv(output_csv_path, index=False)
 

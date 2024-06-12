@@ -50,7 +50,7 @@ class DadoMultiploReg:
             dtc_prediction = self.dtc_regressao.predict(X_new_data)
             dtc_predictions.append('boa' if dtc_prediction[0] == 1 else 'ruim')
 
-        input_data['Previsao_RegressaoLogistica'] = dtc_predictions
+        input_data['resultado'] = dtc_predictions
 
         output_path = 'dados/' + input_csv_path
         input_data.to_csv(output_path, index=False)
