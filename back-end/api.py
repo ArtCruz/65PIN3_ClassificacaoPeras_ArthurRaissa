@@ -36,6 +36,14 @@ def prever_fruta_arvore():
 
 
 @app.route('/multiploArvore', methods=['POST'])
+def processar_csv_arvore():
+    print("arquivo csv: ",request)
+    arquivo_csv = request.json
+    dado_multiplo = DadoMultiplo(dtc_arvore=dtc_arvore)
+    output = dado_multiplo.predict_from_csv(arquivo_csv['file_name'])
+    print(output)
+    return jsonify({"message": "Previsões realizadas com sucesso!"})
+
 # def processar_csv_arvore():
 #     arquivo_csv = request.files['arquivo']
 #     if arquivo_csv:
@@ -49,40 +57,40 @@ def prever_fruta_arvore():
 #             attachment_filename='saida.csv'
 #         )
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'message': 'Nenhum arquivo enviado'}), 400
+# @app.route('/upload', methods=['POST'])
+# def upload_file():
+#     if 'file' not in request.files:
+#         return jsonify({'message': 'Nenhum arquivo enviado'}), 400
     
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'message': 'Nenhum arquivo selecionado'}), 400
+#     file = request.files['file']
+#     if file.filename == '':
+#         return jsonify({'message': 'Nenhum arquivo selecionado'}), 400
     
-    if file:
-        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-            os.makedirs(app.config['UPLOAD_FOLDER'])
+#     if file:
+#         if not os.path.exists(app.config['UPLOAD_FOLDER']):
+#             os.makedirs(app.config['UPLOAD_FOLDER'])
         
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(filepath)
-        return jsonify({"message": f"File {file.filename} uploaded successfully"}), 200
+#         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+#         file.save(filepath)
+#         return jsonify({"message": f"File {file.filename} uploaded successfully"}), 200
 
-@app.route('/calcular', methods=['POST'])
-def calcular():
-    model_type = request.form['model_type']
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], request.form['file_name'])
+# @app.route('/calcular', methods=['POST'])
+# def calcular():
+#     model_type = request.form['model_type']
+#     file_path = os.path.join(app.config['UPLOAD_FOLDER'], request.form['file_name'])
     
-    if model_type == 'ArvoreDecisao':
-        dado_multiplo = DadoMultiplo(dtc_arvore)
-        output_csv_data = dado_multiplo.predict_from_csv(file_path)
+#     if model_type == 'ArvoreDecisao':
+#         dado_multiplo = DadoMultiplo(dtc_arvore)
+#         output_csv_data = dado_multiplo.predict_from_csv(file_path)
         
-        # Aqui você pode salvar a nova tabela no local ou realizar qualquer outra operação necessária
+#         # Aqui você pode salvar a nova tabela no local ou realizar qualquer outra operação necessária
         
-        return jsonify({'message': 'Previsão de frutas múltiplas realizada com sucesso! - Arvore'}), 200
-    elif model_type == 'RegressaoLogistica':
-        # Lógica para a regressão logística
-        return jsonify({'message': 'Previsão de frutas múltiplas realizada com sucesso! - Regressão Logística'}), 200
-    else:
-        return jsonify({'message': 'Tipo de modelo não suportado'}), 400
+#         return jsonify({'message': 'Previsão de frutas múltiplas realizada com sucesso! - Arvore'}), 200
+#     elif model_type == 'RegressaoLogistica':
+#         # Lógica para a regressão logística
+#         return jsonify({'message': 'Previsão de frutas múltiplas realizada com sucesso! - Regressão Logística'}), 200
+#     else:
+#         return jsonify({'message': 'Tipo de modelo não suportado'}), 400
 
 
 
@@ -103,17 +111,23 @@ def prever_fruta_regressao():
 
 @app.route('/multiploRegressao', methods=['POST'])
 def processar_csv_regressao():
-    arquivo_csv = request.files['arquivo']
-    if arquivo_csv:
-        arquivo_csv_data = arquivo_csv.read()
-        dado_multiplo = DadoMultiploReg(dtc_regressao=dtc_regressao)
-        output_csv_data = dado_multiplo.predict_from_csv(arquivo_csv_data)
-        return send_file(
-            StringIO(output_csv_data),
-            mimetype='text/csv',
-            as_attachment=True,
-            attachment_filename='saida.csv'
-        )
+    print("arquivo csv: ",request)
+    arquivo_csv = request.json
+    dado_multiplo = DadoMultiploReg(dtc_regressao=dtc_regressao)
+    output = dado_multiplo.predict_from_csv(arquivo_csv['file_name'])
+    print(output)
+    return jsonify({"message": "Previsões realizadas com sucesso!"})
+
+    # if arquivo_csv:
+    #     arquivo_csv_data = arquivo_csv.read()
+    #     dado_multiplo = DadoMultiploReg(dtc_regressao=dtc_regressao)
+    #     output_csv_data = dado_multiplo.predict_from_csv(arquivo_csv_data)
+    #     return send_file(
+    #         StringIO(output_csv_data),
+    #         mimetype='text/csv',
+    #         as_attachment=True,
+    #         attachment_filename='saida.csv'
+    #     )
     
 
 

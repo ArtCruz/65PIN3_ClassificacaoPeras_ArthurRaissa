@@ -54,7 +54,7 @@ const App = () => {
     Object.keys(Pera).forEach((key, index) => {
       stringPera += Pera[key as keyof ISomenteUmaPera];
       if (index !== Object.keys(Pera).length - 1) {
-        stringPera += ';';
+        stringPera += ',';
       }
     });
 
@@ -64,38 +64,27 @@ const App = () => {
   const handleChoose = (event: any) => {
     const file = event.files[0];
     if (file && file.type === 'text/csv') {
-      setArquivoCSV(file);
+    console.log("pegou nome")
+      setArquivoCSV(file.name);
+    console.log( file.name)
     } else {
       toast.current.show({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, selecione um arquivo CSV', life: 5000 });
     }
   };
 
-  const enviarArquivoCSV = async () => {
-    const formData = new FormData();
-    if (arquivoCSV) {
-      formData.append('file', arquivoCSV);
-      formData.append('model_type', modeloSelecionado);
-      formData.append('file_name', arquivoCSV.name);
-  
-      try {
-        const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-  
-        if (response.status === 200) {
-          const calcularResponse = await axios.post('http://127.0.0.1:5000/calcular', formData);
-          if (calcularResponse.status === 200) {
-            toast.current.show({ severity: 'success', summary: 'Sucesso', detail: calcularResponse.data.message, life: 5000 });
-          }
-        }
-      } catch (error) {
-        toast.current.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao enviar arquivo', life: 5000 });
-        console.error('Erro ao enviar arquivo:', error);
-      }
-    }
-  };
+  // const enviarArquivoCSV = async () => {
+  //   if (arquivoCSV) {
+  //     try {
+  //         const response = await axios.post('http://127.0.0.1:5000/multiploRegressao', {
+  //             file_name: arquivoCSV
+  //         });
+  //         console.log(arquivoCSV)
+  //     } catch (error) {
+  //         toast.current.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao enviar arquivo', life: 5000 });
+  //         console.error('Erro ao enviar arquivo:', error);
+  //     }
+  //   }
+  // };
 
 
 
@@ -140,40 +129,39 @@ const App = () => {
 
   const handleFileSubmitt = async () => {
     if (verificacoes()) {
-      if (modeloSelecionado === REGRESSAO_LOGISTICA) {
-        analiseModeloRegLog()
+      if (modeloSelecionado == REGRESSAO_LOGISTICA) {
+        // analiseModeloRegLog()
+        enviarArquivoCSVRe()
       } else {
-        analiseModeloArvDec()
+        // analiseModeloArvDec()
+        enviarArquivoCSVArv()
       }
       console.log(modeloSelecionado)
       console.log(caractersticas)
       console.log(transformarEmString(caractersticas))
       console.log(arquivoCSV)
-      toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Passou!!!', life: 5000 });
     }
   };
 
-  const handleFileSubmit = async () => {
-    if (verificacoes()) {
-      if (arquivoCSV && todosVazios) {
-        await enviarArquivoCSV();
-      } else if (!arquivoCSV && todosPreenchidos) {
-        // await enviarDadosUnicos();
-      }
-    }
-  };
-
+  // const handleFileSubmit = async () => {
+  //   if (verificacoes()) {
+  //     if (arquivoCSV && todosVazios) {
+  //       await enviarArquivoCSV();
+  //     } else if (!arquivoCSV && todosPreenchidos) {
+  //       // await enviarDadosUnicos();
+  //     }
+  //   }
+  // };
+  
   const analiseModeloRegLog = async () => {
     // const data = Object.values(caractersticas).join(',');
-    const data = [225, -2.002139587, -2.625820278, -0.908798685, -1.780175222, 1.197048603, 3.678592367, -4.434327674];
-
-    console.log(data)
+    // const data = [225, -2.002139587, -2.625820278, -0.908798685, -1.780175222, 1.197048603, 3.678592367, -4.434327674];
     if (!arquivoCSV && todosPreenchidos) {  
+      const data = Object.values(caractersticas).join(',');
       const url = 'http://127.0.0.1:5000/unicoRegressao';
       axios.post(url, { data } )
         .then(response => {
           const resultado = response.data.resultado;
-          // Faça o que quiser com o resultado
           console.log(resultado)
         })
         .catch(error => {
@@ -181,28 +169,30 @@ const App = () => {
         });
 
     } else if (arquivoCSV && todosVazios) {
-      const formData = new FormData();
-      formData.append('arquivo', arquivoCSV);
-      const url = 'http://127.0.0.1:5000/multiploRegressao';
-      axios.post(url, formData, { responseType: 'blob' })
-        .then(response => {
-          // Lidar com a resposta do backend
-          const blob = new Blob([response.data], { type: 'text/csv' });
-          const downloadLink = document.createElement('a');
-          downloadLink.href = URL.createObjectURL(blob);
-          downloadLink.download = 'saida.csv';
-          downloadLink.click();
-        })
-        .catch(error => {
-          console.error('Erro ao enviar arquivo:', error);
+        
+    }
+  };
+  
+  
+  const enviarArquivoCSVRe = async () => {
+    if (arquivoCSV) {
+      try {
+        await axios.post('http://127.0.0.1:5000/multiploRegressao', {
+          file_name: arquivoCSV
         });
+        console.log("Previsões feitas, por favor acesse novamente seu arquivo")
+//-------------ARTHUR FAZER ESSA MENSAGEM EXIBIR NA TELA ------------------------------------------------------------------------
+      } catch (error) {
+        toast.current.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao enviar arquivo', life: 5000 });
+        console.error('Erro ao enviar arquivo:', error);
+      }
     }
   };
 
   const analiseModeloArvDec = async () => {
-    const data = transformarEmString(caractersticas);
 
     if (!arquivoCSV && todosPreenchidos) {
+      const data = transformarEmString(caractersticas);
       const url = 'http://127.0.0.1:5000/unicoArvore';
       axios.post(url, { data })
         .then(response => {
@@ -213,25 +203,25 @@ const App = () => {
         .catch(error => {
           console.error('Erro ao enviar dados:', error);
         });
-    } else if (arquivoCSV && todosVazios) {
-      const formData = new FormData();
-      formData.append('arquivo', arquivoCSV);
-      const url = 'http://127.0.0.1:5000/multiploArvore';
-      axios.post(url, formData, { responseType: 'blob' })
-        .then(response => {
-          // Lidar com a resposta do backend
-          const blob = new Blob([response.data], { type: 'text/csv' });
-          const downloadLink = document.createElement('a');
-          downloadLink.href = URL.createObjectURL(blob);
-          downloadLink.download = 'saida.csv';
-          downloadLink.click();
-        })
-        .catch(error => {
-          console.error('Erro ao enviar arquivo:', error);
-        });
+    } else  {
+    
     }
   };
 
+  const enviarArquivoCSVArv = async () => {
+    if (arquivoCSV) {
+      try {
+          await axios.post('http://127.0.0.1:5000/multiploArvore', {
+              file_name: arquivoCSV
+          });
+          console.log("Previsões feitas, por favor acesse novamente seu arquivo")
+          //-------------ARTHUR FAZER ESSA MENSAGEM EXIBIR NA TELA ------------------------------------------------------------------------
+      } catch (error) {
+          toast.current.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao enviar arquivo', life: 5000 });
+          console.error('Erro ao enviar arquivo:', error);
+      }
+    }
+  }
 
   return (
     <div className='m-0' style={{ backgroundColor: '##FFFACD' }}>
@@ -284,7 +274,7 @@ const App = () => {
         </DataTable>
       </div>
       <div className='flex justify-content-end mr-8'>
-        <Button label="Calcular" onClick={handleFileSubmit} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900" />
+        <Button label="Calcular" onClick={handleFileSubmitt} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900" />
       </div>
     </div>
   );

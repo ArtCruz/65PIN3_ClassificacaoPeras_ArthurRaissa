@@ -28,7 +28,9 @@ class DadoMultiploReg:
         self.dtc_regressao = dtc_regressao
 
     def predict_from_csv(self, input_csv_path):
-        input_data = pd.read_csv(input_csv_path)
+        input_data_path = 'dados/' + input_csv_path
+        print(input_data_path)
+        input_data = pd.read_csv(input_data_path)
         feature_names = ['id','tamanho','peso','docura','crocancia','suculencia','maturacao','acidez']
 
         dtc_predictions = []
@@ -40,8 +42,10 @@ class DadoMultiploReg:
 
         input_data['Previsao_RegressaoLogistica'] = dtc_predictions
 
-        output_csv_data = input_data.to_csv(index=False)
+        output_path = 'dados/' + input_csv_path
+        input_data.to_csv(output_path, index=False)
 
         print('Previsao de frutas multiplas realizada com sucesso! - Regressao')
-        return output_csv_data
+        print(f"Previsoes salvas em {output_path}")
+        return ('Deu')
 
