@@ -32,25 +32,13 @@ const App = () => {
     acidez: '',
   }
 
-  // let frutaRespostaVazia: IFrutaResposta
-  // frutaRespostaVazia = {
-  //   ID: '',
-  //   tamanho: '',
-  //   peso: '',
-  //   docura: '',
-  //   crocancia: '',
-  //   suculencia: '',
-  //   maturacao: '',
-  //   acidez: '',
-  //   resultado: '',
-  // }
-
   const [modeloSelecionado, setModeloSelecionado] = useState<string>('')
-  // const [file, setFile] = useState<File | null>(null);
   const [arquivoCSV, setArquivoCSV] = useState<File | null>(null);
   const [caractersticas, setCaractersticas] = useState<ISomenteUmaPera>(somenteUmaPeraVazia);
   const caractersticasArray = [caractersticas];
   const [respostaFrutaDialog, setRespostaFrutaDialog] = useState<boolean>(false);
+  const [mostrarFileUpload, setMostrarFileUpload] = useState<boolean>(false)
+  const [alteracaoUmaPera, setAlteracaoUmaPera] = useState<boolean>()
   const [resultadoUnico, setResultadoUnico] = useState<any>()
   const [data, setData] = useState<IFrutaResposta[]>([]);
   const toast = useRef<any>(null);
@@ -61,14 +49,17 @@ const App = () => {
     if (resultadoUnico !== undefined) {
       handleFileUploadUnico();
     }
-  }, [resultadoUnico]);  
+    setAlteracaoUmaPera(false)
+  }, [resultadoUnico]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof ISomenteUmaPera) => {
+    setArquivoCSV(null)
     const { value } = e.target;
     setCaractersticas(prevcaractersticas => ({
       ...prevcaractersticas,
       [field]: value
     }));
+    setAlteracaoUmaPera(prev => !prev);
   };
 
   const transformarEmString = (Pera: ISomenteUmaPera) => {
@@ -158,7 +149,6 @@ const App = () => {
     axios.post(url, { data })
       .then(response => {
         const resultado = response.data.resultado;
-        console.log("Aqui: " + resultado)
         setResultadoUnico(resultado)
       })
       .catch(error => {
@@ -174,6 +164,7 @@ const App = () => {
           file_name: arquivoCSV
         });
         toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Previsões feitas, por favor acesse novamente seu arquivo', life: 5000 });
+        setMostrarFileUpload(true)
       } catch (error) {
         toast.current.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao enviar arquivo', life: 5000 });
         console.error('Erro ao enviar arquivo:', error);
@@ -189,7 +180,6 @@ const App = () => {
       axios.post(url, { data })
         .then(response => {
           const resultado = response.data.resultado;
-          console.log("Aqui 2: " + resultado)
           setResultadoUnico(resultado)
         })
         .catch(error => {
@@ -207,6 +197,7 @@ const App = () => {
           file_name: arquivoCSV
         });
         toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Previsões feitas, por favor acesse novamente seu arquivo', life: 5000 });
+        setMostrarFileUpload(true)
       } catch (error) {
         toast.current.show({ severity: 'error', summary: 'Erro', detail: 'Erro ao enviar arquivo', life: 5000 });
         console.error('Erro ao enviar arquivo:', error);
@@ -243,17 +234,18 @@ const App = () => {
     Papa.parse(file, {
       header: true,
       complete: (results: any) => {
-        setData(results.data)
+        setData(results.data);
       }
-    })
-    console.log(data)
+
+    });
 
     setRespostaFrutaDialog(true)
+    e.target.value = '';
+
   };
 
 
   const handleFileUploadUnico = () => {
-    console.log(caractersticasArray);
 
     const newData = caractersticasArray.map((caracteristica) => ({
       id: caracteristica.id,
@@ -266,7 +258,6 @@ const App = () => {
       acidez: caracteristica.acidez,
       resultado: resultadoUnico
     }));
-    console.log(newData)
     setData(newData);
 
     setRespostaFrutaDialog(true)
@@ -277,10 +268,17 @@ const App = () => {
       ...rowData,
       [field]: e.target.value
     }));
+    console.log("Testeee: " + updatedData)
     setData(updatedData);
-    // setRespostaFrutaDialog(true)
   };
 
+  const anularArquivo = () => {
+    setArquivoCSV(null)
+  }
+
+  const limparDataTable = () => {
+    setCaractersticas(somenteUmaPeraVazia)
+  }
 
   return (
     <div className='m-0' style={{ backgroundColor: '##FFFACD' }}>
@@ -306,43 +304,77 @@ const App = () => {
           <div className='pt-4'>
             <p className='ml-3 font-bold text-4xl mr-3' style={{ fontFamily: 'Inika' }}>Calcular Múltiplas Peras:</p>
           </div>
-          <FileUpload className='border-blue-900 border-solid border-round-md' accept=".csv" maxFileSize={1000000} onSelect={handleChoose} emptyTemplate={<p className="m-0">Arraste e Solte o Arquivo CSV Aqui</p>} />
+          <FileUpload className='border-blue-900 border-solid border-round-md' accept=".csv" maxFileSize={1000000} onClear={anularArquivo} onRemove={anularArquivo} onSelect={handleChoose} emptyTemplate={<p className="m-0">Arraste e Solte o Arquivo CSV Aqui</p>} />
         </div>
       </div>
       <div className='ml-3 mr-3 h-16rem'>
-        <p className='font-bold text-4xl' style={{ fontFamily: 'Inika' }} >Calcular Somente uma Pera:</p>
+        <div className="flex items-center justify-content-between">
+          <p className='font-bold text-4xl' style={{ fontFamily: 'Inika' }}>Calcular Somente uma Pera:</p>
+          <Button onClick={limparDataTable} className='text-2xl button-rounded border-round-lg mr-3 h-4rem align-self-center' label='Limpar' />
+        </div>
 
         <DataTable className='border-blue-900 border-solid border-round-md' value={caractersticasArray}  >
-          <Column header="id" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.id} required onChange={(e) => handleInputChange(e, 'id')} />)} />
-          <Column header="tamanho" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.tamanho} required onChange={(e) => handleInputChange(e, 'tamanho')} />)} />
-          <Column header="peso" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.peso} required onChange={(e) => handleInputChange(e, 'peso')} />)} />
-          <Column header="docura" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.docura} required onChange={(e) => handleInputChange(e, 'docura')} />)} />
-          <Column header="crocancia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.crocancia} onChange={(e) => handleInputChange(e, 'crocancia')} />)} />
-          <Column header="suculencia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.suculencia} onChange={(e) => handleInputChange(e, 'suculencia')} />)} />
-          <Column header="maturacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.maturacao} onChange={(e) => handleInputChange(e, 'maturacao')} />)} />
-          <Column header="acidez" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.acidez} onChange={(e) => handleInputChange(e, 'acidez')} />)} />
+          <Column header="id" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.id} required onChange={(e) => handleInputChange(e, 'id')} />)} />
+          <Column header="tamanho" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.tamanho} required onChange={(e) => handleInputChange(e, 'tamanho')} />)} />
+          <Column header="peso" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.peso} required onChange={(e) => handleInputChange(e, 'peso')} />)} />
+          <Column header="docura" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.docura} required onChange={(e) => handleInputChange(e, 'docura')} />)} />
+          <Column header="crocancia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.crocancia} onChange={(e) => handleInputChange(e, 'crocancia')} />)} />
+          <Column header="suculencia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.suculencia} onChange={(e) => handleInputChange(e, 'suculencia')} />)} />
+          <Column header="maturacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.maturacao} onChange={(e) => handleInputChange(e, 'maturacao')} />)} />
+          <Column header="acidez" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.acidez} onChange={(e) => handleInputChange(e, 'acidez')} />)} />
         </DataTable>
       </div>
-      <Dialog visible={respostaFrutaDialog} style={{ width: '80%' }} header={titleHeaderDialog} modal className="p-fluid" onHide={hideResultadoFrutaDialog} > {/*onHide talvez*/}
+      <Dialog visible={respostaFrutaDialog} style={{ width: '80%' }} header={titleHeaderDialog} modal className="p-fluid" onHide={hideResultadoFrutaDialog} >
         <div>
           <DataTable className='border-blue-900 border-solid border-round-md' value={data}  >
-            <Column header="id" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.id} data-id={rowData.ID} required onChange={(e) => handleRespostaChange(e, 'id')} />)} />
-            <Column header="tamanho" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.tamanho} data-id={rowData.ID} required onChange={(e) => handleRespostaChange(e, 'tamanho')} />)} />
-            <Column header="peso" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.peso} data-id={rowData.ID} required onChange={(e) => handleRespostaChange(e, 'peso')} />)} />
-            <Column header="docura" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.docura} data-id={rowData.ID} required onChange={(e) => handleRespostaChange(e, 'docura')} />)} />
-            <Column header="crocancia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.crocancia} data-id={rowData.ID} onChange={(e) => handleRespostaChange(e, 'crocancia')} />)} />
-            <Column header="suculencia" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.suculencia} data-id={rowData.ID} onChange={(e) => handleRespostaChange(e, 'suculencia')} />)} />
-            <Column header="maturacao" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.maturacao} data-id={rowData.ID} onChange={(e) => handleRespostaChange(e, 'maturacao')} />)} />
-            <Column header="acidez" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.acidez} data-id={rowData.ID} onChange={(e) => handleRespostaChange(e, 'acidez')} />)} />
-            <Column header="resultado" bodyStyle={{ backgroundColor: '#cfcfc1' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText value={rowData.resultado} data-id={rowData.ID} onChange={(e) => handleRespostaChange(e, 'resultado')} />)} />
+            <Column header="id" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.id} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'id')} />)} />
+            <Column header="tamanho" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.tamanho} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'tamanho')} />)} />
+            <Column header="peso" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.peso} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'peso')} />)} />
+            <Column header="docura" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.docura} data-id={rowData.ID} readOnly required onChange={(e) => handleRespostaChange(e, 'docura')} />)} />
+            <Column header="crocancia" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.crocancia} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'crocancia')} />)} />
+            <Column header="suculencia" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.suculencia} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'suculencia')} />)} />
+            <Column header="maturacao" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.maturacao} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'maturacao')} />)} />
+            <Column header="acidez" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.acidez} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'acidez')} />)} />
+            <Column header="resultado" bodyStyle={{ backgroundColor: '#cfcfc1', width: '180px', minWidth: '180px' }} headerStyle={{ backgroundColor: '#b0e056', fontSize: '22px', fontFamily: 'Inika' }} body={(rowData) => (<InputText size={25} value={rowData.resultado} data-id={rowData.ID} readOnly onChange={(e) => handleRespostaChange(e, 'resultado')} />)} />
           </DataTable>
         </div>
       </Dialog>
 
-      <div className='flex justify-content-end mr-8'>
-        <input type='file' accept='.csv' onChange={handleFileUploadCSV} />
+      <div className='flex justify-content-end mr-3 mt-3'>
+        {(mostrarFileUpload && arquivoCSV) && (
+          <div style={{ position: 'relative', display: 'inline-block', marginTop: '10px' }}>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileUploadCSV}
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                opacity: 0,
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer'
+              }}
+            />
+            <button
+              style={{
+                display: 'inline-block',
+                padding: '20px 20px',
+                fontSize: '20px',
+                cursor: 'pointer',
+                backgroundColor: '#0d89ec',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px'
+              }}
+            >
+              Visualizar CSV
+            </button>
+          </div>
+        )}
         <Button label="Calcular Arquivo" onClick={handleFileSubmitt} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900 m-2" />
-        <Button label="Calcular Somente uma " onClick={handleFileUnit} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900" />
+        <Button label="Calcular Uma Pera" onClick={handleFileUnit} style={{ fontFamily: 'inika' }} className="button-rounded border-round-lg mt-2 w-2 h-4rem text-2xl text-white bg-orange-900 border-orange-900" />
       </div>
     </div>
   );
